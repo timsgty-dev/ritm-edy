@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Ритм еды</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Палитра: все цвета в одном месте. g/y/r = зелёный/жёлтый/красный в пастели */
+:root{
+  --bg:#f6f3fb; --card:#ffffff; --ink:#3d3a50; --mute:#8f8aa3; --line:#ece7f5;
+  --g:#bfe8d2; --y:#fbe3a0; --r:#f4b9b9;
+  --g2:#7fcaa0; --y2:#eec45f; --r2:#e58f8f;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif;
+  padding:max(20px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom));}
+main{max-width:520px;margin:0 auto;display:grid;gap:18px}
+h1,.big{font-family:Fraunces,Georgia,serif;font-weight:600;margin:0}
+.top{display:flex;justify-content:space-between;align-items:baseline}
+.top h1{font-size:26px}
+.clock{color:var(--mute);font-size:14px;text-align:right}
+.card{background:var(--card);border-radius:28px;padding:20px;box-shadow:0 8px 30px rgba(120,100,170,.08)}
+
+/* Кольцо: сколько времени прошло с последнего приёма пищи (полный круг = 6 часов) */
+.ring{position:relative;width:220px;height:220px;margin:6px auto 0}
+.ring svg{transform:rotate(-90deg)}
+.ring .in{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .big{font-size:38px;line-height:1.1}
+.ring small{color:var(--mute)}
+#arc{transition:stroke-dashoffset .8s ease,stroke .8s ease}
+
+/* Кнопки действий */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{font:inherit;color:var(--ink);border:0;cursor:pointer;border-radius:20px;padding:14px 12px;background:var(--line)}
+button:focus-visible{outline:3px solid #b9a6ec;outline-offset:2px}
+button:active{transform:scale(.97)}
+.main{padding:18px 12px;font-weight:600;font-size:17px}
+.eat{background:var(--g)} .hun{background:var(--y)}
+.lv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.lv button{padding:12px 4px;font-size:14px}
+.l1{background:var(--g)} .l2{background:var(--y)} .l3{background:var(--r)}
+.hidden{display:none!important}
+.sub{color:var(--mute);font-size:14px;margin:0 0 4px}
+
+/* Статистика */
+.tabs{display:flex;gap:6px;background:var(--line);border-radius:18px;padding:4px;margin-bottom:14px}
+.tabs button{flex:1;background:transparent;padding:8px;border-radius:14px;font-size:14px}
+.tabs button[aria-pressed=true]{background:#fff;font-weight:600;box-shadow:0 2px 8px rgba(120,100,170,.12)}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;text-align:center}
+.sum b{display:block;font:600 24px Fraunces,Georgia,serif}
+.sum span{color:var(--mute);font-size:13px}
+.chart{display:flex;align-items:flex-end;gap:3px;height:96px;margin:6px 0 4px}
+.col{flex:1;height:100%;display:flex;flex-direction:column-reverse;justify-content:flex-start;min-width:0}
+.col i{display:block;width:100%}
+.col i:first-child{border-radius:0 0 4px 4px} .col i:last-child{border-radius:4px 4px 0 0}
+.axis{display:flex;gap:3px;font-size:11px;color:var(--mute);height:16px}
+.axis span{flex:1;text-align:center;overflow:visible;white-space:nowrap}
+.ct{margin:14px 0 0;font-weight:600;font-size:15px}
+.foot{text-align:center;color:var(--mute);font-size:13px}
+.link{background:none;padding:6px;color:var(--mute);text-decoration:underline;font-size:13px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:10px 18px;border-radius:16px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1>Ритм еды</h1>
+    <div class="clock" id="clock"></div>
+  </div>
+
+  <!-- Главный блок: кольцо + кнопки (кнопки видит только владелец после ввода пароля) -->
+  <section class="card">
+    <div class="ring">
+      <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+        <circle cx="110" cy="110" r="96" fill="none" stroke="#f0ebf8" stroke-width="16"/>
+        <circle id="arc" cx="110" cy="110" r="96" fill="none" stroke="#bfe8d2" stroke-width="16"
+                stroke-linecap="round" stroke-dasharray="603.19" stroke-dashoffset="603.19"/>
+      </svg>
+      <div class="in"><small>с последней еды</small><div class="big" id="since">—</div><small id="lastAt"></small></div>
+    </div>
+
+    <div id="owner" class="hidden" style="margin-top:18px">
+      <div class="row">
+        <button class="main eat" id="bEat">Поел</button>
+        <button class="main hun" id="bHun">Проголодался</button>
+      </div>
+      <div id="eatPick" class="hidden">
+        <p class="sub" style="margin-top:14px">Насколько плотно?</p>
+        <div class="lv">
+          <button class="l1" data-k="meal" data-l="1">Перекус</button>
+          <button class="l2" data-k="meal" data-l="2">Не плотно</button>
+          <button class="l3" data-k="meal" data-l="3">Плотно</button>
+        </div>
+      </div>
+      <div id="hunPick" class="hidden">
+        <p class="sub" style="margin-top:14px">Насколько голоден?</p>
+        <div class="lv">
+          <button class="l1" data-k="hunger" data-l="1">Немного</button>
+          <button class="l2" data-k="hunger" data-l="2">Голодный</button>
+          <button class="l3" data-k="hunger" data-l="3">Очень</button>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:8px"><button class="link" id="bUndo">Отменить последнюю запись</button></div>
+    </div>
+  </section>
+
+  <!-- Статистика видна всем -->
+  <section class="card">
+    <div class="tabs" role="group" aria-label="Период">
+      <button data-r="day" aria-pressed="true">День</button>
+      <button data-r="week" aria-pressed="false">Неделя</button>
+      <button data-r="month" aria-pressed="false">Месяц</button>
+    </div>
+    <div class="sum">
+      <div><b id="sMeals">0</b><span>приёмов</span></div>
+      <div><b id="sGap">—</b><span>между едой</span></div>
+      <div><b id="sHun">0</b><span>голодных</span></div>
+    </div>
+    <p class="ct">Еда</p>
+    <div class="chart" id="cMeal"></div><div class="axis" id="aMeal"></div>
+    <p class="ct">Голод</p>
+    <div class="chart" id="cHun"></div><div class="axis" id="aHun"></div>
+  </section>
+
+  <p class="foot"><span id="mode">Режим просмотра</span> <button class="link" id="bLogin">Я владелец</button></p>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+/* ---- Настройки Supabase. Публичный ключ можно держать в коде: защита записи — в базе (SQL) ---- */
+const SB_URL = 'https://mfdqhenvmiqbsqhbmngc.supabase.co';
+const SB_KEY = 'sb_publishable_Jo0GJeWK4kIKMLKVk3yT8g_ISuja9EN';
+const HDR = { apikey: SB_KEY, 'Content-Type': 'application/json' };
+
+let events = [];            // все записи из базы
+let range = 'day';          // выбранный период статистики
+let pass = sessionStorage.getItem('rp') || '';  // пароль живёт только до закрытия вкладки
+let isOwner = false;
+
+const $ = id => document.getElementById(id);
+const COL = ['', 'var(--g2)', 'var(--y2)', 'var(--r2)'];   // цвета столбцов по уровню 1..3
+
+function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'),2200); }
+
+/* ---- Работа с сервером ---- */
+async function load(){
+  try{
+    // Чтение открыто всем (политика select в SQL). Берём свежие записи первыми.
+    const r = await fetch(`${SB_URL}/rest/v1/events?select=kind,level,created_at&order=created_at.desc&limit=5000`, {headers:HDR});
+    if(!r.ok) throw new Error(r.status);
+    events = (await r.json()).map(e=>({...e, t:new Date(e.created_at)}));
+    render();
+  }catch(e){ toast('Не удалось загрузить данные'); }
+}
+async function rpc(name, args){
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${name}`, {method:'POST', headers:HDR, body:JSON.stringify(args)});
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+/* ---- Вход владельца: пароль проверяет база, в коде его нет ---- */
+async function checkPass(p){
+  try{ return await rpc('check_pass', {p_pass:p}) === true; }catch{ return false; }
+}
+async function setOwner(on){
+  isOwner = on;
+  $('owner').classList.toggle('hidden', !on);
+  $('mode').textContent = on ? 'Режим владельца' : 'Режим просмотра';
+  $('bLogin').textContent = on ? 'Выйти' : 'Я владелец';
+}
+$('bLogin').onclick = async () => {
+  if(isOwner){ pass=''; sessionStorage.removeItem('rp'); setOwner(false); return; }
+  const p = prompt('Пароль владельца');
+  if(!p) return;
+  if(await checkPass(p)){ pass=p; sessionStorage.setItem('rp',p); setOwner(true); toast('Вход выполнен'); }
+  else toast('Неверный пароль');
+};
+
+/* ---- Действия владельца ---- */
+$('bEat').onclick = () => { $('eatPick').classList.toggle('hidden'); $('hunPick').classList.add('hidden'); };
+$('bHun').onclick = () => { $('hunPick').classList.toggle('hidden'); $('eatPick').classList.add('hidden'); };
+document.querySelectorAll('.lv button').forEach(b => b.onclick = async () => {
+  try{
+    await rpc('add_event', {p_pass:pass, p_kind:b.dataset.k, p_level:+b.dataset.l});
+    $('eatPick').classList.add('hidden'); $('hunPick').classList.add('hidden');
+    toast(b.dataset.k==='meal' ? 'Записано: поел' : 'Записано: голод');
+    load();
+  }catch{ toast('Не записалось. Проверь пароль и сеть'); }
+});
+$('bUndo').onclick = async () => {
+  if(!confirm('Удалить последнюю запись?')) return;
+  try{ await rpc('delete_last_event', {p_pass:pass}); toast('Удалено'); load(); }
+  catch{ toast('Не удалось удалить'); }
+};
+
+/* ---- Время и кольцо ---- */
+const pad = n => String(n).padStart(2,'0');
+const DAYS = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+const fmtDur = ms => { const m=Math.floor(ms/60000); return m<60 ? `${m} мин` : `${Math.floor(m/60)} ч ${pad(m%60)}`; };
+
+function tick(){
+  const n = new Date();
+  $('clock').innerHTML = `${DAYS[n.getDay()]}<br>${pad(n.getHours())}:${pad(n.getMinutes())}`;
+  const last = events.find(e=>e.kind==='meal');   // events отсортированы: новые первыми
+  if(!last){ $('since').textContent='—'; $('lastAt').textContent='нет данных'; return; }
+  const ms = n - last.t;
+  $('since').textContent = fmtDur(ms);
+  $('lastAt').textContent = `в ${pad(last.t.getHours())}:${pad(last.t.getMinutes())}`;
+  const p = Math.min(ms/(6*36e5), 1);               // 6 часов = полный круг
+  const arc = $('arc');
+  arc.style.strokeDashoffset = 603.19*(1-p);
+  arc.style.stroke = p<1/3 ? '#bfe8d2' : p<2/3 ? '#fbe3a0' : '#f4b9b9';
+}
+
+/* ---- Статистика: делим период на корзины (часы или дни) ---- */
+function buckets(){
+  const n=new Date(), d0=new Date(n.getFullYear(),n.getMonth(),n.getDate()), out=[];
+  if(range==='day'){
+    for(let h=0;h<24;h++) out.push({s:new Date(+d0+h*36e5), e:new Date(+d0+(h+1)*36e5), label:h%3===0?h:''});
+  }else{
+    const cnt = range==='week'?7:30, wd=['вс','пн','вт','ср','чт','пт','сб'];
+    for(let i=cnt-1;i>=0;i--){
+      const s=new Date(d0); s.setDate(s.getDate()-i);
+      const e=new Date(s);  e.setDate(e.getDate()+1);
+      out.push({s,e,label: range==='week' ? wd[s.getDay()] : (s.getDate()%5===0 ? s.getDate() : '')});
+    }
+  }
+  return out;
+}
+function chart(kind, bks, boxId, axisId){
+  const cnt = bks.map(b=>{ const c=[0,0,0,0];
+    events.forEach(e=>{ if(e.kind===kind && e.t>=b.s && e.t<b.e) c[e.level]++; }); return c; });
+  const max = Math.max(1, ...cnt.map(c=>c[1]+c[2]+c[3]));
+  $(boxId).innerHTML = cnt.map(c=>`<div class="col">${[1,2,3].map(l=>
+      c[l]?`<i style="height:${c[l]/max*100}%;background:${COL[l]}"></i>`:'').join('')}</div>`).join('');
+  $(axisId).innerHTML = bks.map(b=>`<span>${b.label}</span>`).join('');
+}
+function render(){
+  const bks = buckets(), from = bks[0].s, to = bks[bks.length-1].e;
+  const inR = events.filter(e=>e.t>=from && e.t<to);
+  const meals = inR.filter(e=>e.kind==='meal').sort((a,b)=>a.t-b.t);
+  $('sMeals').textContent = meals.length;
+  $('sHun').textContent = inR.filter(e=>e.kind==='hunger').length;
+  let gap='—';
+  if(meals.length>1){ gap = fmtDur((meals[meals.length-1].t-meals[0].t)/(meals.length-1)); }
+  $('sGap').textContent = gap;
+  chart('meal', bks, 'cMeal', 'aMeal');
+  chart('hunger', bks, 'cHun', 'aHun');
+  tick();
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  range = b.dataset.r;
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+  render();
+});
+
+/* ---- Старт ---- */
+(async () => {
+  if(pass && await checkPass(pass)) setOwner(true); else { pass=''; sessionStorage.removeItem('rp'); }
+  load();
+  setInterval(tick, 30000);   // обновляем «сколько прошло»
+  setInterval(load, 60000);   // друзья видят свежие данные без перезагрузки
+})();
+</script>
+</body>
+</html>
