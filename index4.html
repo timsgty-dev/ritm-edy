@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ритм еды</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#fdf4ef;--bg2:#e6f4ef;--bg3:#ebe6fb;--ink:#3b3a4a;--mut:#8b889b;--card:rgba(255,255,255,.66);--line:rgba(80,70,110,.12);--g:#a9e1bf;--y:#f8e18f;--r:#f6aaaa;--gi:#3f8f64;--yi:#a8820f;--ri:#b84f4f;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#1d1b2b;--bg2:#1c2b2c;--bg3:#2a2342;--ink:#ece9f7;--mut:#a29fb6;--card:rgba(255,255,255,.07);--line:rgba(255,255,255,.12);--g:#6fbf91;--y:#e6cd72;--r:#e48a8a;--gi:#8fe0b3;--yi:#f0d97f;--ri:#f2a0a0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg1:#1d1b2b;--bg2:#1c2b2c;--bg3:#2a2342;--ink:#ece9f7;--mut:#a29fb6;--card:rgba(255,255,255,.07);--line:rgba(255,255,255,.12);--g:#6fbf91;--y:#e6cd72;--r:#e48a8a;--gi:#8fe0b3;--yi:#f0d97f;--ri:#f2a0a0;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Nunito,system-ui,sans-serif;color:var(--ink);background:radial-gradient(70% 45% at 5% 0%,var(--bg3),transparent),radial-gradient(60% 45% at 100% 25%,var(--bg2),transparent),var(--bg1);background-attachment:fixed}
+#app{max-width:480px;margin:0 auto;padding:18px 18px 110px}
+h1,h2,.big{font-family:Fraunces,Georgia,serif;font-weight:500;margin:0}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:4px;backdrop-filter:blur(12px)}
+.seg button{border:0;background:none;color:var(--mut);font:600 14px Nunito,sans-serif;padding:8px 16px;border-radius:99px;cursor:pointer;transition:.25s}
+.seg button.on{background:var(--ink);color:var(--bg1)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:18px;margin-bottom:14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.date{color:var(--mut);font-size:14px;text-transform:capitalize}
+.clock{font-family:Fraunces,Georgia,serif;font-size:54px;line-height:1.05;letter-spacing:-1px}
+.since{display:flex;align-items:center;gap:14px}
+.since .big{font-size:30px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;flex:none}
+.g{background:var(--g)}.y{background:var(--y)}.r{background:var(--r)}
+.ring{background:none!important;border:3px solid}
+.ring.g{border-color:var(--g)}.ring.y{border-color:var(--y)}.ring.r{border-color:var(--r)}
+.hero{display:flex;flex-direction:column;align-items:center;gap:16px;margin:26px 0 22px}
+.eat{width:176px;height:176px;border-radius:50%;border:0;cursor:pointer;font:500 30px Fraunces,Georgia,serif;color:#3b3a4a;background:radial-gradient(circle at 30% 25%,#fff8,transparent 55%),linear-gradient(145deg,#bfeccf,#f9e7a4 55%,#f7b9b0);box-shadow:0 18px 40px -12px #e7a79a99,0 0 0 12px #ffffff40;animation:br 4.5s ease-in-out infinite;transition:transform .2s}
+.eat:active{transform:scale(.94)}
+@keyframes br{50%{box-shadow:0 22px 46px -10px #a9e1bfaa,0 0 0 20px #ffffff22}}
+.hung{border:1px solid var(--line);background:var(--card);color:var(--ink);font:700 15px Nunito,sans-serif;padding:13px 26px;border-radius:99px;cursor:pointer;backdrop-filter:blur(10px)}
+.list{display:flex;flex-direction:column;gap:2px}
+.it{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.it:last-child{border:0}.it .t{color:var(--mut);width:46px;font-variant-numeric:tabular-nums}.it .n{flex:1}
+.it button{border:0;background:none;color:var(--mut);font-size:18px;cursor:pointer}
+.mut{color:var(--mut);font-size:14px}
+.sheet{position:fixed;inset:0;background:#2a244066;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(4px);z-index:10}
+.sheet.open{opacity:1;pointer-events:auto}
+.pane{width:100%;max-width:480px;background:var(--bg1);border-radius:30px 30px 0 0;padding:24px 18px calc(24px + env(safe-area-inset-bottom,0px));transform:translateY(40px);transition:.3s;border:1px solid var(--line)}
+.sheet.open .pane{transform:none}
+.pane h2{font-size:24px;margin-bottom:4px}
+.opt{display:flex;align-items:center;gap:14px;width:100%;border:0;border-radius:22px;padding:17px 18px;margin-top:10px;font:700 17px Nunito,sans-serif;color:#3b3a4a;cursor:pointer;text-align:left;transition:transform .15s}
+.opt:active{transform:scale(.97)}.opt small{display:block;font:400 13px Nunito,sans-serif;opacity:.75}
+.opt.g{background:var(--g)}.opt.y{background:var(--y)}.opt.r{background:var(--r)}
+.cancel{display:block;margin:14px auto 0;border:0;background:none;color:var(--mut);font:600 15px Nunito,sans-serif;cursor:pointer}
+.nav{display:flex;justify-content:space-between;align-items:center;margin:14px 2px}
+.nav button{border:1px solid var(--line);background:var(--card);color:var(--ink);width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer}
+.nav button:disabled{opacity:.3}
+.nav h2{font-size:22px;text-transform:capitalize}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.sum b{display:block;font:500 28px Fraunces,Georgia,serif}.sum span{font-size:12px;color:var(--mut)}
+.tl{position:relative;height:150px;margin:10px 4px 0}
+.tl .lane{position:absolute;left:0;right:0;height:44px;border-radius:22px;background:var(--line)}
+.tl .m{position:absolute;top:50%;transform:translate(-50%,-50%)}
+.tl .m.e{width:26px;height:26px;border-radius:50%;box-shadow:0 4px 10px -3px #0003}
+.tl .m.h{width:18px;height:18px}
+.ax{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin:6px 4px 0}
+.cap{font-size:12px;color:var(--mut);margin:4px 4px 6px}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end}
+.col{display:flex;flex-direction:column;align-items:center;gap:6px}
+.stack{height:130px;width:100%;display:flex;flex-direction:column-reverse;gap:4px;align-items:center}
+.blk{width:100%;max-width:34px;height:18px;border-radius:9px}
+.hd{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;min-height:30px;align-content:flex-start}
+.hd .dot{width:9px;height:9px;border-width:2px}
+.col small{font-size:11px;color:var(--mut);text-align:center;line-height:1.2}.col.today small{color:var(--ink);font-weight:700}
+.mo{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.wd{font-size:11px;color:var(--mut);text-align:center}
+.cell{aspect-ratio:1;border-radius:14px;background:var(--line);padding:5px;display:flex;flex-direction:column;justify-content:space-between;font-size:11px}
+.cell.td{outline:2px solid var(--ink)}.cell.void{background:none}
+.cell .ds{display:flex;flex-wrap:wrap;gap:2px}.cell .dot{width:7px;height:7px}.cell .ring{border-width:2px}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg1);padding:11px 20px;border-radius:99px;font-weight:700;font-size:14px;opacity:0;transition:.3s;z-index:20;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.leg{display:flex;gap:14px;justify-content:center;font-size:12px;color:var(--mut);margin-top:10px}
+.leg span{display:flex;align-items:center;gap:5px}.leg .dot{width:10px;height:10px;border-width:2px}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,480px);display:flex;gap:4px;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:24px 24px 0 0;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:5}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;color:var(--mut);font:600 12px Nunito,sans-serif;padding:6px 0;border-radius:16px;cursor:pointer;transition:.25s}
+.tabs button.on{color:var(--ink);background:var(--line)}
+body.night{--bg1:#12152b;--bg2:#17233d;--bg3:#271f4d}
+.moon{width:176px;height:176px;border-radius:50%;border:0;cursor:pointer;font:500 30px Fraunces,Georgia,serif;color:#f6efd6;background:radial-gradient(circle at 30% 25%,#ffffff40,transparent 55%),linear-gradient(145deg,#7b72e6,#3d3f9f 60%,#1f2358);box-shadow:0 18px 40px -12px #6c63d9aa,0 0 0 12px #ffffff12;animation:bn 5s ease-in-out infinite;transition:transform .2s}
+.moon.up{color:#3b3a4a;background:radial-gradient(circle at 30% 25%,#fff8,transparent 55%),linear-gradient(145deg,#f7e3a1,#f5c58f 60%,#f0a58f);box-shadow:0 18px 40px -12px #f0a58faa,0 0 0 12px #ffffff18}
+.moon:active{transform:scale(.94)}
+@keyframes bn{50%{box-shadow:0 22px 46px -10px #a99cf0aa,0 0 0 20px #ffffff0c}}
+.fl{display:block;margin-top:14px;font:600 14px Nunito,sans-serif;color:var(--mut)}
+.fl input{display:block;width:100%;margin-top:6px;padding:13px 14px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 16px Nunito,sans-serif}
+.opt.sv{background:var(--ink);color:var(--bg1);justify-content:center}
+.sbar{position:absolute;top:0;height:44px;border-radius:22px;background:linear-gradient(90deg,#7b72e6,#a99cf0)}
+.sw{position:relative;height:130px;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.sw::after{content:"";position:absolute;left:-3px;right:-3px;bottom:80%;border-top:1px dashed var(--mut)}
+.sb{display:block;width:100%;max-width:34px;border-radius:12px 12px 6px 6px;background:var(--line)}
+.sb.g{background:var(--g)}.sb.y{background:var(--y)}.sb.r{background:var(--r)}
+</style></head>
+<body><div id="app"></div>
+<div class="sheet" id="sheet"><div class="pane" id="pane"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const EL=['Перекус','Не плотно','Плотно'],ES=['лёгкий перекус','обычный приём','сытно, плотно'];
+const HL=['Немного','Голодный','Очень голоден'],HS=['слегка хочется есть','пора поесть','срочно нужна еда'];
+const C=['g','y','r'],KEY='rhythm.v1';
+/* Данные теперь в общей базе артефакта (коллекция events). Писать может только владелец, читают все, кто открыл ссылку. */
+let ev=[],col=null,isOwner=false,preview=false,state='loading'; // state: loading | ok | none (база недоступна)
+const canW=()=>state==='ok'&&isOwner&&!preview;
+/* Два режима хранения в одном файле: mode='art' — внутри Claude (встроенная база), mode='sb' — на GitHub Pages (Supabase, вход по паролю). */
+const SB_URL='https://mfdqhenvmiqbsqhbmngc.supabase.co',SB_KEY='sb_publishable_Jo0GJeWK4kIKMLKVk3yT8g_ISuja9EN';
+let mode='',pass='';
+const HDR={apikey:SB_KEY,'Content-Type':'application/json'};
+async function rpc(n,a){const r=await fetch(SB_URL+'/rest/v1/rpc/'+n,{method:'POST',headers:HDR,body:JSON.stringify(a)});if(!r.ok)throw new Error(await r.text());return r.json()}
+async function loadSB(){try{const r=await fetch(SB_URL+'/rest/v1/events?select=id,kind,level,created_at&order=created_at.desc&limit=5000',{headers:HDR});if(!r.ok)throw 0;
+ ev=(await r.json()).map(x=>({id:x.id,t:new Date(x.created_at).getTime(),k:x.kind==='meal'?'e':'h',l:x.level-1}));state='ok'}catch(e){if(state!=='ok')state='none'}await loadSleep()}
+async function initSB(){mode='sb';try{pass=sessionStorage.getItem('rp')||''}catch(e){}
+ if(pass){try{isOwner=await rpc('check_pass',{p_pass:pass})===true}catch(e){}if(!isOwner)pass=''}
+ await loadSB();setInterval(loadSB,60000)}
+async function login(){if(isOwner){isOwner=false;pass='';try{sessionStorage.removeItem('rp')}catch(e){}render();return}
+ const p=prompt('Пароль владельца');if(!p)return;
+ try{if(await rpc('check_pass',{p_pass:p})===true){isOwner=true;pass=p;try{sessionStorage.setItem('rp',p)}catch(e){}toast('Вход выполнен')}else toast('Неверный пароль')}catch(e){toast('Нет связи с базой')}render()}
+const writeEv=e=>mode==='sb'?rpc('add_event',{p_pass:pass,p_kind:e.k==='e'?'meal':'hunger',p_level:e.l+1}).then(loadSB):col.doc(String(e.t)).set(e);
+const delEv=t=>{if(mode==='sb'){const x=ev.find(v=>v.t===+t);return x?rpc('delete_event',{p_pass:pass,p_id:x.id}).then(loadSB):Promise.resolve()}return col.doc(String(t)).delete()};
+const localEv=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return[]}};
+async function importLocal(){const L=localEv();try{for(const e of L)await col.doc(String(e.t)).set({t:e.t,k:e.k,l:e.l});try{localStorage.removeItem(KEY)}catch(x){}toast('Перенесено: '+L.length);render()}catch(x){toast('Не удалось перенести')}}
+function footer(){let h='';
+ if(isOwner&&state==='ok'){h+=`<button class="cancel" data-pv="1">${preview?'Вернуться в режим владельца':'Посмотреть как друзья'}</button>`;
+  if(!preview&&mode==='art'&&localEv().length)h+=`<button class="cancel" data-imp="1">Перенести ${localEv().length} записей с этого устройства</button>`}
+ return `<div style="text-align:center;margin-top:8px"><div class="mut">${isOwner&&!preview?'Режим владельца':'Режим просмотра'}</div>${h}${mode==='sb'?`<button class="cancel" data-login="1">${isOwner?'Выйти':'Я владелец'}</button>`:''}</div>`}
+let view='home',range='day',off=0,topic='food';
+const $=s=>document.querySelector(s);
+const sod=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
+const add=(t,n)=>{const d=new Date(t);d.setDate(d.getDate()+n);return d.getTime()};
+const hm=t=>new Date(t).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+const dur=ms=>{const m=Math.max(0,Math.floor(ms/6e4)),h=Math.floor(m/60);return h?h+' ч '+(m%60)+' мин':m+' мин'};
+const inR=(a,b)=>ev.filter(e=>e.t>=a&&e.t<b);
+const lastEat=()=>ev.filter(e=>e.k==='e').reduce((m,e)=>e.t>m?e.t:m,0);
+function item(e){const lab=e.k==='e'?EL[e.l]:HL[e.l];return `<div class="it"><span class="t">${hm(e.t)}</span><span class="dot ${C[e.l]} ${e.k==='h'?'ring':''}"></span><span class="n">${e.k==='e'?'Поел':'Голод'}: ${lab}</span>${canW()?`<button data-del="${e.t}" aria-label="Удалить">×</button>`:''}</div>`}
+function summary(L,days){const E=L.filter(e=>e.k==='e').sort((a,b)=>a.t-b.t),H=L.filter(e=>e.k==='h');
+ let s=0,n=0;for(let i=1;i<E.length;i++){const d=E[i].t-E[i-1].t;if(d<14*36e5){s+=d;n++}}
+ return `<div class="card sum"><div><b>${E.length}</b><span>приёмов пищи</span></div><div><b>${H.length}</b><span>отметок голода</span></div><div><b>${n?(s/n/36e5).toFixed(1)+' ч':'—'}</b><span>средний интервал</span></div></div>`}
+const legend=`<div class="leg"><span><i class="dot g"></i>перекус</span><span><i class="dot y"></i>не плотно</span><span><i class="dot r"></i>плотно</span><span><i class="dot ring g"></i>голод</span></div>`;
+function home(){const n=Date.now(),le=lastEat(),a=sod(n),L=inR(a,add(a,1)).sort((x,y)=>y.t-x.t);
+ return `<div class="card"><div class="date" id="dt"></div><div class="clock" id="ck"></div></div>
+ <div class="card since"><span class="dot ${le?C[ev.filter(e=>e.t===le)[0].l]:'g'}" style="width:18px;height:18px"></span><div><div class="mut">С последнего приёма</div><div class="big" id="sn">${le?dur(n-le):'—'}</div>${le?`<div class="mut">в ${hm(le)}</div>`:'<div class="mut">записей пока нет</div>'}</div></div>
+ ${canW()?`<div class="hero"><button class="eat" data-a="eat">Поел</button><button class="hung" data-a="hun">Проголодался</button></div>`:`<div class="card mut" style="text-align:center;margin:22px 0">${state==='none'?(mode==='sb'?'Не удалось загрузить данные. Проверь интернет и обнови страницу.':'Чтобы увидеть статистику, войди в Claude и открой ссылку от владельца.'):state==='loading'?'Загрузка…':'Режим просмотра: записи ведёт владелец.'}</div>`}
+ <div class="card"><h2 style="font-size:20px;margin-bottom:6px">Сегодня</h2>${L.length?`<div class="list">${L.map(item).join('')}</div>`:'<div class="mut">Пока пусто. Нажми «Поел» или «Проголодался».</div>'}</div>`}
+function title(a,b){return off===0?(range==='day'?'Сегодня':range==='week'?'Эта неделя':'Этот месяц'):''}
+function foodStats(){let h=`<div class="seg" style="justify-content:center">${[['day','День'],['week','Неделя'],['month','Месяц']].map(([k,l])=>`<button data-r="${k}" class="${range===k?'on':''}">${l}</button>`).join('')}</div>`;
+ const today=sod(Date.now());
+ if(range==='day'){const a=add(today,off),b=add(a,1),L=inR(a,b).sort((x,y)=>x.t-y.t),p=t=>((t-a)/(b-a)*100).toFixed(2);
+  const nm=off===0?'Сегодня':new Date(a).toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'long'});
+  h+=nav(nm)+summary(L)+`<div class="card"><div class="cap">Поел</div><div class="tl" style="height:120px"><div class="lane" style="top:0"></div>${L.filter(e=>e.k==='e').map(e=>`<i class="m e ${C[e.l]}" style="left:${p(e.t)}%;top:22px" title="${hm(e.t)}"></i>`).join('')}<div class="lane" style="top:70px"></div>${L.filter(e=>e.k==='h').map(e=>`<i class="m h dot ring ${C[e.l]}" style="left:${p(e.t)}%;top:92px;background:var(--bg1)!important" title="${hm(e.t)}"></i>`).join('')}</div><div class="ax"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div><div class="cap" style="margin-top:6px">Голод — нижняя дорожка</div>${legend}</div>`+
+  `<div class="card">${L.length?`<div class="list">${[...L].reverse().map(item).join('')}</div>`:'<div class="mut">В этот день записей нет.</div>'}</div>`}
+ if(range==='week'){const s=add(today,off*7-6),days=[...Array(7)].map((_,i)=>add(s,i)),L=inR(s,add(s,7));
+  const nm=new Date(s).toLocaleDateString('ru',{day:'numeric',month:'short'})+' – '+new Date(days[6]).toLocaleDateString('ru',{day:'numeric',month:'short'});
+  h+=nav(nm)+summary(L)+`<div class="card"><div class="wk">${days.map(d=>{const D=inR(d,add(d,1)).sort((x,y)=>x.t-y.t);
+   return `<div class="col ${d===today?'today':''}"><div class="stack">${D.filter(e=>e.k==='e').map(e=>`<i class="blk ${C[e.l]}"></i>`).join('')}</div><div class="hd">${D.filter(e=>e.k==='h').map(e=>`<i class="dot ring ${C[e.l]}"></i>`).join('')}</div><small>${new Date(d).toLocaleDateString('ru',{weekday:'short'})}<br>${new Date(d).getDate()}</small></div>`}).join('')}</div>${legend}</div>`}
+ if(range==='month'){const m=new Date(today);m.setDate(1);m.setMonth(m.getMonth()+off);const y=m.getFullYear(),mo=m.getMonth(),first=(m.getDay()+6)%7,cnt=new Date(y,mo+1,0).getDate(),s=m.getTime(),L=inR(s,new Date(y,mo+1,1).getTime());
+  h+=nav(m.toLocaleDateString('ru',{month:'long',year:'numeric'}))+summary(L)+`<div class="card"><div class="mo">${['пн','вт','ср','чт','пт','сб','вс'].map(x=>`<div class="wd">${x}</div>`).join('')}${[...Array(first)].map(()=>'<div class="cell void"></div>').join('')}${[...Array(cnt)].map((_,i)=>{const d=new Date(y,mo,i+1).getTime(),D=inR(d,add(d,1)).sort((a,b)=>a.t-b.t);
+   return `<div class="cell ${d===today?'td':''}"><span>${i+1}</span><div class="ds">${D.slice(0,8).map(e=>`<i class="dot ${C[e.l]} ${e.k==='h'?'ring':''}"></i>`).join('')}</div></div>`}).join('')}</div>${legend}</div>`}
+ return h}
+function nav(t){return `<div class="nav"><button data-n="-1" aria-label="Назад">‹</button><h2>${t}</h2><button data-n="1" ${off>=0?'disabled':''} aria-label="Вперёд">›</button></div>`}
+/* ===== Сон: данные в Supabase (таблица sleep), писать может только владелец ===== */
+const NORM=8;let sl=[],slOk=false;
+async function loadSleep(){try{const r=await fetch(SB_URL+'/rest/v1/sleep?select=id,start_at,end_at&order=start_at.desc&limit=2000',{headers:HDR});if(!r.ok)throw 0;sl=(await r.json()).map(x=>({id:x.id,s:new Date(x.start_at).getTime(),e:x.end_at?new Date(x.end_at).getTime():null}));slOk=true}catch(e){slOk=false}render()}
+const canS=()=>mode==='sb'&&isOwner&&!preview&&slOk;
+const sOpen=()=>sl.find(x=>x.e===null);
+const iso=t=>new Date(t).toISOString();
+const sAdd=(s,e)=>rpc('sleep_add',{p_pass:pass,p_start:iso(s),p_end:e==null?null:iso(e)}).then(loadSleep);
+const sUpd=(id,s,e)=>rpc('sleep_update',{p_pass:pass,p_id:id,p_start:iso(s),p_end:e==null?null:iso(e)}).then(loadSleep);
+const sDel=id=>rpc('sleep_delete',{p_pass:pass,p_id:id}).then(loadSleep);
+const dl=t=>new Date(t-new Date(t).getTimezoneOffset()*6e4).toISOString().slice(0,16);
+const fh=ms=>(ms/36e5).toFixed(1).replace('.',',')+' ч';
+const sc=ms=>ms/36e5>=NORM?'g':ms/36e5>=NORM-1.5?'y':'r';
+const nights=(a,b)=>sl.filter(x=>x.e!==null&&x.e>=a&&x.e<b).sort((p,q)=>p.e-q.e);
+const sleg=`<div class="leg"><span><i class="dot g"></i>норма и больше</span><span><i class="dot y"></i>недосып до 1,5 ч</span><span><i class="dot r"></i>меньше</span></div>`;
+/* среднее время суток и разброс (в минутах); o — смещение, чтобы ночь через полночь не ломала среднее */
+function cl(arr,o){const m=arr.map(t=>{const d=new Date(t);return(d.getHours()*60+d.getMinutes()-o+1440)%1440}),a=m.reduce((p,c)=>p+c,0)/m.length,sd=Math.sqrt(m.reduce((p,c)=>p+(c-a)**2,0)/m.length),r=Math.round(a+o)%1440;return{t:String(Math.floor(r/60)).padStart(2,'0')+':'+String(r%60).padStart(2,'0'),sd:Math.round(sd)}}
+function sSum(L){if(!L.length)return `<div class="card mut" style="text-align:center">Записей сна за этот период нет.</div>`;
+ const tot=L.reduce((p,x)=>p+x.e-x.s,0),def=L.reduce((p,x)=>p+Math.max(0,NORM*36e5-(x.e-x.s)),0),b=cl(L.map(x=>x.s),1080),w=cl(L.map(x=>x.e),0),sp=c=>L.length>1?', ±'+c.sd+' мин':'';
+ return `<div class="card sum"><div><b>${fh(tot/L.length)}</b><span>среднее за ночь</span></div><div><b>${L.length}</b><span>ночей</span></div><div><b>${fh(def)}</b><span>недосып за период</span></div></div><div class="card sum" style="grid-template-columns:repeat(2,1fr)"><div><b>${b.t}</b><span>отбой${sp(b)}</span></div><div><b>${w.t}</b><span>подъём${sp(w)}</span></div></div>`}
+const sItem=x=>`<div class="it"><span class="t" style="width:auto;min-width:46px">${new Date(x.e||x.s).toLocaleDateString('ru',{weekday:'short',day:'numeric'})}</span><span class="n">${hm(x.s)} → ${x.e?hm(x.e):'…'}</span><span class="mut">${x.e?dur(x.e-x.s):'спит'}</span>${canS()?`<button data-se="${x.id}" aria-label="Править">✎</button><button data-sd="${x.id}" aria-label="Удалить">×</button>`:''}</div>`;
+function sleepHome(){if(mode!=='sb')return `<div class="card mut" style="text-align:center">Сон работает на сайте, а не внутри Claude.</div>`;
+ const o=sOpen(),n=Date.now(),last=sl.filter(x=>x.e!==null).sort((a,b)=>b.e-a.e)[0],R=[...sl].sort((a,b)=>b.s-a.s).slice(0,7);
+ return `<div class="card"><div class="date" id="dt"></div><div class="clock" id="ck"></div></div>
+ <div class="card since"><div>${o?`<div class="mut">Спишь с ${hm(o.s)}</div><div class="big" id="sq">${dur(n-o.s)}</div>`:`<div class="mut">Последний сон</div><div class="big">${last?dur(last.e-last.s):'—'}</div><div class="mut">${last?hm(last.s)+' → '+hm(last.e):'записей пока нет'}</div>`}</div></div>
+ ${canS()?`<div class="hero"><button class="moon ${o?'up':''}" data-sa="${o?'out':'in'}">${o?'Проснулся':'Лёг'}</button><button class="hung" data-sa="man">Указать время вручную</button></div>`:`<div class="card mut" style="text-align:center;margin:22px 0">${slOk?'Режим просмотра: записи ведёт владелец.':'Данные сна пока недоступны.'}</div>`}
+ <div class="card"><h2 style="font-size:20px;margin-bottom:6px">Последние ночи</h2>${R.length?`<div class="list">${R.map(sItem).join('')}</div>`:'<div class="mut">Пока пусто. Нажми «Лёг», когда пойдёшь спать.</div>'}</div>`}
+function sleepSheet(id){const x=id?sl.find(v=>v.id===+id):null,n=Date.now();
+ $('#pane').innerHTML=`<h2>${x?'Править сон':'Добавить сон'}</h2><div class="mut">Когда лёг и когда проснулся</div><label class="fl">Лёг<input type="datetime-local" id="fs" value="${dl(x?x.s:n-8*36e5)}"></label><label class="fl">Проснулся<input type="datetime-local" id="fe" value="${x?(x.e===null?'':dl(x.e)):dl(n)}"></label><button class="opt sv" data-ss="${id}">Сохранить</button><button class="cancel" data-close="1">Отмена</button>`;$('#sheet').classList.add('open')}
+function saveSleep(id){const s=new Date($('#fs').value).getTime(),v=$('#fe').value,e=v?new Date(v).getTime():null,x=id?sl.find(q=>q.id===+id):null;
+ if(isNaN(s))return toast('Укажи, когда лёг');
+ if(e!==null&&(isNaN(e)||e<=s||e-s>24*36e5))return toast('Сон должен длиться от 1 минуты до 24 часов');
+ if(e===null&&(!x||x.e!==null)&&sOpen()&&!(x&&x.e===null))return toast('Уже есть незавершённый сон');
+ if(x&&x.e!==null&&e===null)return toast('Укажи, когда проснулся');
+ (x?sUpd(x.id,s,e):sAdd(s,e)).then(()=>{$('#sheet').classList.remove('open');toast('Записано: сон')}).catch(()=>toast('Не записалось'))}
+const rseg=()=>`<div class="seg" style="justify-content:center">${[['day','День'],['week','Неделя'],['month','Месяц']].map(([k,l])=>`<button data-r="${k}" class="${range===k?'on':''}">${l}</button>`).join('')}</div>`;
+function sleepStats(){if(mode!=='sb'||!slOk)return `<div class="card mut" style="text-align:center;margin-top:14px">Данные сна пока недоступны.</div>`;
+ const today=sod(Date.now());let h=rseg();
+ if(range==='day'){const a=add(today,off),b=add(a,1),L=nights(a,b);
+  h+=nav(off===0?'Сегодня':new Date(a).toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'long'}))+sSum(L)+`<div class="card"><div class="cap">Ночь, закончившаяся в этот день</div><div class="tl" style="height:44px"><div class="lane" style="top:0"></div>${L.map(x=>{const l=Math.max(x.s,a);return `<i class="sbar" style="left:${((l-a)/(b-a)*100).toFixed(2)}%;width:${((x.e-l)/(b-a)*100).toFixed(2)}%"></i>`}).join('')}</div><div class="ax"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div></div><div class="card">${L.length?`<div class="list">${L.map(sItem).join('')}</div>`:'<div class="mut">В этот день записей нет.</div>'}</div>`}
+ if(range==='week'){const s=add(today,off*7-6),days=[...Array(7)].map((_,i)=>add(s,i)),L=nights(s,add(s,7));
+  h+=nav(new Date(s).toLocaleDateString('ru',{day:'numeric',month:'short'})+' – '+new Date(days[6]).toLocaleDateString('ru',{day:'numeric',month:'short'}))+sSum(L)+`<div class="card"><div class="wk">${days.map(d=>{const D=nights(d,add(d,1)),t=D.reduce((p,x)=>p+x.e-x.s,0);return `<div class="col ${d===today?'today':''}"><div class="sw"><i class="sb ${D.length?sc(t):''}" style="height:${D.length?Math.min(100,t/36e5*10):0}%"></i></div><small>${D.length?fh(t).replace(' ч',''):'–'}<br>${new Date(d).toLocaleDateString('ru',{weekday:'short'})}</small></div>`}).join('')}</div><div class="cap" style="margin-top:8px">Пунктир: норма ${NORM} ч</div>${sleg}</div>`}
+ if(range==='month'){const m=new Date(today);m.setDate(1);m.setMonth(m.getMonth()+off);const y=m.getFullYear(),mo=m.getMonth(),first=(m.getDay()+6)%7,cnt=new Date(y,mo+1,0).getDate(),L=nights(m.getTime(),new Date(y,mo+1,1).getTime());
+  h+=nav(m.toLocaleDateString('ru',{month:'long',year:'numeric'}))+sSum(L)+`<div class="card"><div class="mo">${['пн','вт','ср','чт','пт','сб','вс'].map(x=>`<div class="wd">${x}</div>`).join('')}${[...Array(first)].map(()=>'<div class="cell void"></div>').join('')}${[...Array(cnt)].map((_,i)=>{const d=new Date(y,mo,i+1).getTime(),D=nights(d,add(d,1)),t=D.reduce((p,x)=>p+x.e-x.s,0);return `<div class="cell ${d===today?'td':''}" style="${D.length?`background:color-mix(in srgb,var(--${sc(t)}) 45%,transparent)`:''}"><span>${i+1}</span><span>${D.length?fh(t).replace(' ч',''):''}</span></div>`}).join('')}</div>${sleg}</div>`}
+ return h}
+function stats(){return `<div class="seg" style="justify-content:center;margin-bottom:12px">${[['food','Еда'],['sleep','Сон']].map(([k,l])=>`<button data-top="${k}" class="${topic===k?'on':''}">${l}</button>`).join('')}</div>`+(topic==='sleep'?sleepStats():foodStats())}
+const tabs=()=>`<nav class="tabs">${[['home','Еда','<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>'],['sleep','Сон','<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'],['stats','Статистика','<path d="M5 20V11M12 20V5M19 20v-7"/>']].map(([k,l,p])=>`<button data-v="${k}" class="${view===k?'on':''}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg><span>${l}</span></button>`).join('')}</nav>`;
+/* Тёмная тема только у «Сна»: остальные экраны всегда светлые */
+function render(){const night=view==='sleep'||(view==='stats'&&topic==='sleep');document.documentElement.dataset.theme=night?'dark':'light';document.body.classList.toggle('night',night);
+ const T={home:'Ритм еды',sleep:'Ритм сна',stats:'Статистика'};
+ $('#app').innerHTML=`<div class="top"><h1>${T[view]}</h1></div>`+(view==='home'?home():view==='sleep'?sleepHome():stats())+footer()+tabs();tick()}
+function tick(){const n=new Date();const d=$('#dt');if(d){d.textContent=n.toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'long'});$('#ck').textContent=hm(n)}const le=lastEat(),s=$('#sn');if(s&&le)s.textContent=dur(Date.now()-le);const o=sOpen(),q=$('#sq');if(o&&q)q.textContent=dur(Date.now()-o.s)}
+setInterval(tick,5000);
+function sheet(kind){const e=kind==='eat';$('#pane').innerHTML=`<h2>${e?'Что за приём?':'Насколько голоден?'}</h2><div class="mut">${e?'Выбери, насколько плотно поел':'Отметь уровень голода прямо сейчас'}</div>`+[0,1,2].map(i=>`<button class="opt ${C[i]}" data-add="${kind}" data-l="${i}"><span>${e?EL[i]:HL[i]}<small>${e?ES[i]:HS[i]}</small></span></button>`).join('')+`<button class="cancel" data-close="1">Отмена</button>`;$('#sheet').classList.add('open')}
+function toast(t){const o=$('#toast');o.textContent=t;o.classList.add('on');setTimeout(()=>o.classList.remove('on'),1800)}
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t){if(e.target.id==='sheet')$('#sheet').classList.remove('open');return}
+ const D=t.dataset;
+ if(D.v){view=D.v;off=0;render()}
+ else if(D.r){range=D.r;off=0;render()}
+ else if(D.n){off+=+D.n;if(off>0)off=0;render()}
+ else if(D.a)sheet(D.a)
+ else if(D.close)$('#sheet').classList.remove('open')
+ else if(D.add){if(!canW())return;const k=D.add==='eat'?'e':'h',t=Date.now();$('#sheet').classList.remove('open');writeEv({t,k,l:+D.l}).then(()=>toast(k==='e'?'Записано: поел':'Записано: голод')).catch(()=>toast('Не записалось'))}
+ else if(D.del){if(!canW())return;delEv(D.del).catch(()=>toast('Не удалилось'))}
+ else if(D.pv){preview=!preview;render()}
+ else if(D.login)login()
+ else if(D.imp)importLocal()
+ else if(D.top){topic=D.top;off=0;render()}
+ else if(D.sa){if(!canS())return;if(D.sa==='in')sAdd(Date.now(),null).then(()=>toast('Записано: лёг')).catch(()=>toast('Не записалось'));else if(D.sa==='out'){const o=sOpen();if(o)sUpd(o.id,o.s,Date.now()).then(()=>toast('Записано: проснулся')).catch(()=>toast('Не записалось'))}else sleepSheet('')}
+ else if(D.se!==undefined){if(canS())sleepSheet(D.se)}
+ else if(D.sd){if(canS()&&confirm('Удалить запись сна?'))sDel(+D.sd).catch(()=>toast('Не удалилось'))}
+ else if(D.ss!==undefined)saveSleep(D.ss)});
+render();
+(async()=>{
+ try{
+  if(typeof claude==='undefined'){await initSB();return}
+  mode='art';
+  const u=await claude.use('user');if(u)isOwner=await u.isOwner(); // владелец определяется аккаунтом Claude, пароль не нужен
+  const db=await claude.use('db');
+  if(!db)throw 0;
+  col=db.collection('events');
+  col.onSnapshot(s=>{ev=s.docs.map(d=>d.data()).filter(Boolean);state='ok';render()},()=>{state='none';render()});
+ }catch(e){state='none'}
+ render();
+})();
+setTimeout(()=>{if(state==='loading'){state='none';render()}},10000);
+</script></body></html>
